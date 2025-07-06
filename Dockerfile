@@ -11,8 +11,7 @@ RUN xbps-install -Suy && \
     xbps-install -y binutils perl curl make git musl-devel libatomic-devel base-devel rust cargo openssl-devel libunwind-devel libgcc-devel
 
 # Clone & Build
-RUN git clone https://github.com/pymumu/smartdns.git /build/smartdns && \
-    git clone https://github.com/pymumu/smartdns-webui.git /build/frontend
+RUN git clone https://github.com/pymumu/smartdns.git /build/smartdns
 WORKDIR /build/smartdns
 
 # Build C/C++ Core
@@ -47,11 +46,14 @@ RUN \
 # =================================================
 # STAGE 2: BUILDER FRONTEND
 # =================================================
-FROM node:18-alpine AS frontend-builder
-# Build
+FROM node:alpine AS frontend-builder
+# Install git
+RUN apk add --no-cache git
+
+# Clone & Build
+RUN git clone https://github.com/pymumu/smartdns-webui.git /build/frontend
 WORKDIR /build/frontend
 RUN npm install && npm run build && mv out wwwroot
-
 # =================================================
 # STAGE 3: RUNTIME FINAL
 # =================================================
