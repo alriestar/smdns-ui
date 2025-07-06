@@ -30,7 +30,10 @@ RUN \
     export CC=gcc CFLAGS="${EXTRA_CFLAGS}" LDFLAGS="${EXTRA_LDFLAGS}" && \
     sh ./package/build-pkg.sh --platform linux --arch "${ARCH}" && \
     (cd package && tar -xvf *.tar.gz && chmod a+x smartdns/etc/init.d/smartdns) && \
-    strip /build/smartdns/package/smartdns/usr/sbin/smartdns
+    strip /build/smartdns/package/smartdns/usr/sbin/smartdns && \
+    mkdir -p /release/etc/smartdns/ && \
+    mkdir -p /release/usr && \
+    cp -a package/smartdns/usr/* /release/usr/
 
 # Build Rust Plugin
 RUN \
@@ -42,11 +45,13 @@ RUN \
     esac && \
     cd /build/smartdns/plugin/smartdns-ui && \
     cargo build --target ${RUST_TARGET} --release
+    mkdir -p /release/usr/lib && \
+    cp target/release/libsmartdns_ui.so /release/usr/lib/
 
 # =================================================
 # STAGE 2: BUILDER FRONTEND
 # =================================================
-FROM node:20-alpine AS frontend-builder
+FROM node:lts-alpine AS frontend-builder
 
 # Install git
 RUN apk add --no-cache git
@@ -54,7 +59,7 @@ RUN apk add --no-cache git
 # Clone & Build
 RUN git clone https://github.com/pymumu/smartdns-webui.git /build/frontend
 WORKDIR /build/frontend
-RUN npm install && npm run build && mv out wwwroot
+RUN npm install && NODE_ENV=production npm run build --no-analytics && mv out wwwroot && mkdir -p /release/usr/share/smartdns && cp -r wwwroot /release/usr/share/smartdns
 # =================================================
 # STAGE 3: RUNTIME FINAL
 # =================================================
@@ -65,10 +70,11 @@ RUN mkdir -p /etc/smartdns /usr/sbin /usr/lib /usr/share/smartdns && \
     xbps-install -Sy libatomic libgcc libunwind    
 
 # Copy the build results from ALL previous builders
-COPY --from=smartdns-builder /build/smartdns/package/smartdns/etc/* /etc/
-COPY --from=smartdns-builder /build/smartdns/package/smartdns/usr/sbin/smartdns /usr/sbin/
-COPY --from=smartdns-builder /build/smartdns/plugin/smartdns-ui/target/*-unknown-linux-*/release/libsmartdns_ui.so /usr/lib/
-COPY --from=frontend-builder /build/frontend/wwwroot /usr/share/smartdns/wwwroot
+COPY --from=smartdns-builder /release/etc      /etc
+COPY --from=smartdns-builder /release/usr/sbin /usr/sbin
+COPY --from=smartdns-builder /release/usr/lib  /usr/lib
+COPY --from=smartdns-builder /release/usr/share/smartdns /usr/share/smartdns
+
 
 EXPOSE 53/udp 53/tcp 6080
 VOLUME ["/etc/smartdns/"]
