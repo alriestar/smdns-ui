@@ -1,9 +1,8 @@
 # =================================================
-# STAGE 1: MAIN BUILDER (C/C++ & Rust)STAGE 1: MAIN BUILDER (C/C++ & Rust)
+# STAGE 1: MAIN BUILDER (C/C++ & Rust)
 # =================================================
 FROM ghcr.io/void-linux/void-musl-busybox:latest AS smartdns-builder
 
-# CHANGE: 'nodejs' has been removed from here.
 RUN xbps-install -Suy && \
     xbps-install -y binutils perl curl make git musl-devel libatomic-devel base-devel rust cargo openssl-devel libunwind-devel libgcc-devel
 
@@ -54,12 +53,14 @@ RUN \
     cp "target/${RUST_TARGET}/release/libsmartdns_ui.so" /release/usr/lib/
 
 # =================================================
-# STAGE 2: BUILDER FRONTEND (Node.js) <-- STAGE BARU
-# This stage will only run once, not for every platform.
+# STAGE 2: BUILDER FRONTEND (Node.js)
 # =================================================
 FROM node:18-alpine AS frontend-builder
 
-# Clone repo web UI
+# CHANGES: Install 'git' using the Alpine package manager 'apk'
+RUN apk add --no-cache git
+
+# Now the 'git clone' command will succeed.
 RUN git clone https://github.com/pymumu/smartdns-webui.git /build/frontend
 WORKDIR /build/frontend
 
@@ -69,12 +70,10 @@ RUN npm install && \
     mv out wwwroot
 
 # =================================================
-# STAGE 3: FINALISASI BUILD
-# Next, return to the main builder to copy the frontend build results.
+# STAGE 3: FINISHING
 # =================================================
 FROM smartdns-builder AS final-builder
 
-# Copy the frontend build results (which are architecture-independent) to the release directory
 COPY --from=frontend-builder /build/frontend/wwwroot /release/usr/share/smartdns/wwwroot
 
 # Cleanup
@@ -95,7 +94,6 @@ RUN mkdir -p \
       libgcc \
       libunwind    
 
-# CHANGES: Taking the results from the 'final-builder' stage
 COPY --from=final-builder /release/etc      /etc
 COPY --from=final-builder /release/usr/sbin /usr/sbin
 COPY --from=final-builder /release/usr/lib  /usr/lib
@@ -104,5 +102,4 @@ COPY --from=final-builder /release/usr/share/smartdns /usr/share/smartdns
 EXPOSE 53/udp 53/tcp 6080
 VOLUME ["/etc/smartdns/"]
 
-# MINOR IMPROVEMENT: Removed extra spaces in CMD
 CMD ["/usr/sbin/smartdns", "-f", "-x", "-p", "-"]
