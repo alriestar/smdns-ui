@@ -1,0 +1,58 @@
+name: Build and Push SmartDNS Image
+
+on:
+  push:
+    branches: [ "main" ] # Hanya build saat push ke branch main
+  workflow_dispatch: # Izinkan trigger manual
+
+env:
+  # PERUBAHAN: Ganti nama image sesuai dengan proyek Anda
+  IMAGE_NAME: smartdns-w-ui
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Generate Date Tag
+        id: date-tag # Beri ID agar bisa diakses di step lain jika perlu
+        run: echo "TAG_CURRENT=$(date +'v%Y%m%d')" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # PERUBAHAN: Tambahkan QEMU untuk emulasi arsitektur ARM
+      # Ini sangat penting untuk cross-compilation di runner x86_64
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Asumsi Dockerfile ada di root repo
+          push: true
+          # PERUBAHAN: Tambahkan linux/arm/v7 ke daftar platform
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.TAG_CURRENT }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+          # PERUBAHAN: Aktifkan cache untuk mempercepat build selanjutnya
+          # Ini akan menyimpan layer Docker, termasuk hasil download 'cargo' dan 'npm'
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
