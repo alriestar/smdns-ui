@@ -3,6 +3,9 @@
 # =================================================
 FROM ghcr.io/void-linux/void-musl-busybox:latest AS smartdns-builder
 
+# FIX HERE: Declare ARG to be available in the stage
+ARG TARGETPLATFORM
+
 # Install build dependencies
 RUN xbps-install -Suy && \
     xbps-install -y binutils perl curl make git musl-devel libatomic-devel base-devel rust cargo openssl-devel libunwind-devel libgcc-devel
@@ -41,7 +44,7 @@ RUN \
     cargo build --target ${RUST_TARGET} --release
 
 # =================================================
-# STAGE 2: BUILDER FRONTEND (Architecture-Independent)
+# STAGE 2: BUILDER FRONTEND
 # =================================================
 FROM node:18-alpine AS frontend-builder
 
