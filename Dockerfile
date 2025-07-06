@@ -46,7 +46,8 @@ RUN \
 # =================================================
 # STAGE 2: BUILDER FRONTEND
 # =================================================
-FROM node:alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
+
 # Install git
 RUN apk add --no-cache git
 
