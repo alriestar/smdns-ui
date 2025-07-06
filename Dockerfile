@@ -44,7 +44,7 @@ RUN \
       *) echo "Unsupported Rust TARGETPLATFORM: ${TARGETPLATFORM}" && exit 1 ;; \
     esac && \
     cd /build/smartdns/plugin/smartdns-ui && \
-    cargo build --target ${RUST_TARGET} --release
+    cargo build --target ${RUST_TARGET} --release && \
     mkdir -p /release/usr/lib && \
     cp target/release/libsmartdns_ui.so /release/usr/lib/
 
