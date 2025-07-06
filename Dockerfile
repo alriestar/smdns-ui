@@ -47,8 +47,7 @@ RUN \
 # =================================================
 # STAGE 2: BUILDER FRONTEND
 # =================================================
-FROM cgr.dev/chainguard/node:latest AS frontend-builder
-
+FROM node:18-alpine AS frontend-builder
 # Build
 WORKDIR /build/frontend
 RUN npm install && npm run build && mv out wwwroot
