@@ -46,7 +46,7 @@ RUN \
     cd /build/smartdns/plugin/smartdns-ui && \
     cargo build --target ${RUST_TARGET} --release && \
     mkdir -p /release/usr/lib && \
-    cp target/release/libsmartdns_ui.so /release/usr/lib/
+    cp target/${RUST_TARGET}/release/libsmartdns_ui.so /release/usr/lib/
 
 # =================================================
 # STAGE 2: BUILDER FRONTEND
