@@ -79,5 +79,5 @@ COPY --from=frontend-builder /release/usr/share/smartdns /usr/share/smartdns
 
 EXPOSE 53/udp 53/tcp 6080
 VOLUME ["/etc/smartdns/"]
-
+HEALTHCHECK --interval=5m CMD test $(nslookup dns.pub 127.0.0.1 |grep answer |wc -l) -gt 0
 CMD ["/usr/sbin/smartdns", "-f", "-x", "-p", "-"]
