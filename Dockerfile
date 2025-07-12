@@ -75,7 +75,7 @@ RUN mkdir -p /etc/smartdns /usr/sbin /usr/lib /usr/share/smartdns && \
 COPY --from=smartdns-builder /release/etc /etc
 COPY --from=smartdns-builder /release/usr/sbin /usr/sbin
 COPY --from=smartdns-builder /release/usr/lib /usr/lib
-COPY --from=smartdns-builder /release/usr/share/smartdns /usr/share/smartdns
+COPY --from=frontend-builder /release/usr/share/smartdns /usr/share/smartdns
 
 EXPOSE 53/udp 53/tcp 6080
 VOLUME ["/etc/smartdns/"]
