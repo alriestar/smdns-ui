@@ -45,6 +45,7 @@ RUN \
     esac && \
     cd /build/smartdns/plugin/smartdns-ui && \
     cargo build --target ${RUST_TARGET} --release && \
+    ls -l target/${RUST_TARGET}/release/ && \
     mkdir -p /release/usr/lib && \
     cp target/${RUST_TARGET}/release/libsmartdns_ui.so /release/usr/lib/
 
@@ -60,6 +61,7 @@ RUN apk add --no-cache git
 RUN git clone https://github.com/pymumu/smartdns-webui.git /build/frontend
 WORKDIR /build/frontend
 RUN npm install && NODE_ENV=production npm run build --no-analytics && mv out wwwroot && mkdir -p /release/usr/share/smartdns && cp -r wwwroot /release/usr/share/smartdns
+
 # =================================================
 # STAGE 3: RUNTIME FINAL
 # =================================================
@@ -70,11 +72,10 @@ RUN mkdir -p /etc/smartdns /usr/sbin /usr/lib /usr/share/smartdns && \
     xbps-install -Sy libatomic libgcc libunwind    
 
 # Copy the build results from ALL previous builders
-COPY --from=smartdns-builder /release/etc      /etc
+COPY --from=smartdns-builder /release/etc /etc
 COPY --from=smartdns-builder /release/usr/sbin /usr/sbin
-COPY --from=smartdns-builder /release/usr/lib  /usr/lib
+COPY --from=smartdns-builder /release/usr/lib /usr/lib
 COPY --from=smartdns-builder /release/usr/share/smartdns /usr/share/smartdns
-
 
 EXPOSE 53/udp 53/tcp 6080
 VOLUME ["/etc/smartdns/"]
