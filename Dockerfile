@@ -19,6 +19,7 @@ RUN \
     case "${TARGETPLATFORM}" in \
       "linux/amd64")   ARCH=x86_64 ;; \
       "linux/arm64")   ARCH=aarch64 ;; \
+      "linux/arm/v7")  ARCH=armv7l ;; \
       *) echo "Unsupported C/C++ TARGETPLATFORM: ${TARGETPLATFORM}" && exit 1 ;; \
     esac && \
     EXTRA_CFLAGS="" && EXTRA_LDFLAGS="" && \
@@ -39,6 +40,7 @@ RUN \
     case "${TARGETPLATFORM}" in \
       "linux/amd64")   RUST_TARGET=x86_64-unknown-linux-musl ;; \
       "linux/arm64")   RUST_TARGET=aarch64-unknown-linux-musl ;; \
+      "linux/arm/v7")  RUST_TARGET=armv7-unknown-linux-musleabihf ;; \
       *) echo "Unsupported Rust TARGETPLATFORM: ${TARGETPLATFORM}" && exit 1 ;; \
     esac && \
     cd /build/smartdns/plugin/smartdns-ui && \

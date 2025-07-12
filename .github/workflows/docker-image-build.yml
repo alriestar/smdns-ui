@@ -9,6 +9,7 @@ env:
   # CHANGE: Rename the image according to your project
   IMAGE_NAME: smartdns-w-ui
   REGISTRY: ghcr.io
+#GOARCH: ${{ matrix.goarch }}
 
 jobs:
   build-and-push:
@@ -16,6 +17,14 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+          - linux/arm/v7
 
     steps:
       - name: Generate Date Tag
@@ -44,9 +53,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: . # Assumption that Dockerfile is in the root repo
+          file: ./Dockerfile
           push: true
-          # CHANGE: Add linux/arm/v7 to the list of platforms
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            TARGETPLATFORM=${{ matrix.platform }}
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.TAG_CURRENT }}
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
