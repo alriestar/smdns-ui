@@ -1,10 +1,11 @@
+ARG TARGETPLATFORM
 # =================================================
 # STAGE 1: BUILDER C/C++/Rust
 # =================================================
 FROM ghcr.io/void-linux/void-musl-busybox:latest AS smartdns-builder
 
 # FIX HERE: Declare ARG to be available in the stage
-ARG TARGETPLATFORM
+#ARG TARGETPLATFORM
 
 # Install build dependencies
 RUN xbps-install -Suy && \
