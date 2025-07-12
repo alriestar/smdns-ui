@@ -2,11 +2,11 @@ name: Build and Push SmartDNS Image
 
 on:
   push:
-    branches: [ "main" ] # Hanya build saat push ke branch main
-  workflow_dispatch: # Izinkan trigger manual
+    branches: [ "main" ] # Only build when pushing to the main branch
+  workflow_dispatch: # Allow manual trigger
 
 env:
-  # PERUBAHAN: Ganti nama image sesuai dengan proyek Anda
+  # CHANGE: Rename the image according to your project
   IMAGE_NAME: smartdns-w-ui
   REGISTRY: ghcr.io
 
@@ -19,14 +19,14 @@ jobs:
 
     steps:
       - name: Generate Date Tag
-        id: date-tag # Beri ID agar bisa diakses di step lain jika perlu
+        id: date-tag # Assign an ID so that it can be accessed in other steps if necessary.
         run: echo "TAG_CURRENT=$(date +'v%Y%m%d')" >> $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # PERUBAHAN: Tambahkan QEMU untuk emulasi arsitektur ARM
-      # Ini sangat penting untuk cross-compilation di runner x86_64
+      # CHANGES: Add QEMU for ARM architecture emulation
+      # This is very important for cross-compilation on x86_64 runners.
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -43,15 +43,15 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: . # Asumsi Dockerfile ada di root repo
+          context: . # Assumption that Dockerfile is in the root repo
           push: true
-          # PERUBAHAN: Tambahkan linux/arm/v7 ke daftar platform
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          # CHANGE: Add linux/arm/v7 to the list of platforms
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.TAG_CURRENT }}
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
-          # PERUBAHAN: Aktifkan cache untuk mempercepat build selanjutnya
-          # Ini akan menyimpan layer Docker, termasuk hasil download 'cargo' dan 'npm'
+          # CHANGES: Enable cache to speed up subsequent builds
+          # This will save the Docker layer, including the downloaded 'cargo' and 'npm' results.
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
