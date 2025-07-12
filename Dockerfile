@@ -8,7 +8,7 @@ ARG TARGETPLATFORM
 
 # Install build dependencies
 RUN xbps-install -Suy && \
-    xbps-install -y binutils perl curl make git musl-devel libatomic-devel base-devel rust cargo openssl-devel libunwind-devel libgcc-devel clang
+    xbps-install -y binutils perl curl make git musl-devel libatomic-devel base-devel rust cargo openssl-devel libunwind-devel libgcc-devel clang cmake
 
 # Clone & Build
 RUN git clone https://github.com/pymumu/smartdns.git /build/smartdns
