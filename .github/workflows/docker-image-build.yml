@@ -1,4 +1,4 @@
-name: Build and Push SmartDNS Image
+name: Build and Push SmartDNS Image Commit 8bae7c1
 
 on:
   push:
