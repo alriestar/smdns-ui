@@ -8,7 +8,8 @@ FROM ghcr.io/void-linux/void-musl-busybox:latest AS smartdns-builder
 ARG TARGETPLATFORM
 
 # Install build dependencies
-RUN xbps-install -Suy && \
+RUN xbps-install -u xbps && \
+    xbps-install -Suy && \
     xbps-install -y binutils perl curl make git musl-devel libatomic-devel base-devel rust cargo openssl-devel libunwind-devel libgcc-devel clang cmake
 
 # Clone & Build
