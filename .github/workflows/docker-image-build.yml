@@ -63,7 +63,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
           # CHANGES: Enable cache to speed up subsequent builds
           # This will save the Docker layer, including the downloaded 'cargo' and 'npm' results.
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          #cache-from: type=gha
+          #cache-to: type=gha,mode=max
           provenance: false
           sbom: false
